@@ -1,0 +1,10 @@
+Combination,Settings,Combined: hold ends,Combined: first month 25% below $14.59,Combined: 2027-07 ($/g),Combined: 2028-01 ($/g),Combined: 2029-01 ($/g),Combined: 2029-12 ($/g),Adult-use only: hold ends,Adult-use only: first month 25% below $14.59,Adult-use only: 2027-07 ($/g),Adult-use only: 2028-01 ($/g),Adult-use only: 2029-01 ($/g),Adult-use only: 2029-12 ($/g)
+Base,Base,2027-03,2027-05,8.66,5.35,2.91,2.75,2026-12,2027-02,7.03,4.34,2.55,2.83
+Later anchor + slow price adjustment,"Michigan month 14 anchor, 5% speed limit",2027-05,2027-11,12.57,9.48,5.12,4.15,2027-02,2027-07,10.85,8.17,4.41,4.28
+Fewer plants harvested + weaker sales,"40% harvested, 75% of added flower sells",2027-06,2027-08,11.84,7.88,5.35,3.88,2027-01,2027-03,8.74,7.03,4.23,3.51
+Fewer plants harvested + slower planting,"40% harvested, half the outdoor-season rate",2027-05,2027-07,10.67,7.55,5.35,3.88,2026-12,2027-03,7.79,6.97,4.23,3.51
+Fewer plants harvested + fewer licenses,"40% harvested, half of approvals",2027-05,2027-07,10.67,7.55,4.37,3.74,2026-12,2027-03,7.79,6.5,3.9,3.51
+Slow price adjustment + weak sales,"5% speed limit, 50% of added flower sells",2027-06,2027-11,13.17,9.68,5.68,3.74,2027-01,2027-06,10.19,7.49,4.05,3.51
+Slow supply chain,"5-month harvest lag, 2-month sale lag, 18-month sell-through",2027-05,2027-07,10.67,6.97,2.91,3.06,2027-01,2027-04,7.36,5.66,2.62,3.06
+Weak production and sales,"40% harvested, half outdoor rate, half of approvals, 75% sells",2027-06,2027-09,11.84,8.74,7.03,6.28,2027-01,2027-03,8.74,7.55,6.28,5.67
+Stress case: every adverse test at once,"Month 14 anchor, 5% limit, 40% harvested, 50% sells, half outdoor rate, half of approvals, slow chain",2028-05,,14.59,14.59,11.94,11.64,2027-09,2029-03,14.59,13.23,11.64,9.51
