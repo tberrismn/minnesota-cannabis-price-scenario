@@ -17,15 +17,18 @@ with open(os.path.join(OUT, 'chart_supply_scenarios.csv'), 'w', newline='') as f
                    [round(HV[n][p]) if p in HV[n] else None for n, _, _ in SCEN] + [basis])
 
 # ---------------- chart
+LONG = lambda p: D(p).strftime('%B %Y'); SHORT = lambda i: dt.date(2026, i, 1).strftime('%b')
+SETTLED = add(max(au), LAG)                       # harvests through this month come from plants already started
+NOD = (f'{SHORT(NO_DATA[0])}-{SHORT(NO_DATA[-1])}' if len(NO_DATA) > 1 else SHORT(NO_DATA[0])) if NO_DATA else ''
 fig = plt.figure(figsize=(9.7, 8.4), dpi=150); fig.patch.set_facecolor(SURF)
 gs = fig.add_gridspec(2, 1, height_ratios=[1, 1.9], hspace=0.3, left=0.09, right=0.8, top=0.83, bottom=0.135)
 fig.text(0.06, 0.965, 'How much cannabis Minnesota could grow as licenses convert', fontsize=14.5, weight='bold', color=INK, va='top')
 sub = ('Licensed cultivation sites and plants harvested per month under four licensing scenarios for the 975 microbusiness, 48 mezzobusiness '
-       'and 19 cultivator preliminary approvals. Harvests through November 2026 come from plants already started, so every scenario matches until then.')
+       f'and 19 cultivator preliminary approvals. Harvests through {LONG(SETTLED)} come from plants already started, so every scenario matches until then.')
 fig.text(0.06, 0.93, '\n'.join(textwrap.wrap(sub, 137)), fontsize=9.3, color=INK2, va='top')
-src = (f'Source: MN OCM Cannabis Market Monitor (plants started and harvested), OCM license workbook and Summary Application Data (Sept. 21, 2026). '
+src = (f'Source: MN OCM Cannabis Market Monitor (plants started and harvested; licensed sites as of Sept. 25, 2026), OCM license workbook (Sept. 14, 2026) and Summary Application Data (Sept. 21, 2026). '
        f'Assumptions from Minnesota\'s 2026 data: {MICRO_SHARE:.0%} of microbusinesses hold a cultivation site; each site starts plants at the 2026 rate for that '
-       f'calendar month (Aug-Dec: January-April average, {INDOOR:.0f} per site); {SURV:.0%} of started plants are harvested {LAG} months later. Fractions convert '
+       f'calendar month ({NOD}, not yet published: January-April average, {INDOOR:.0f} per site); {SURV:.0%} of started plants are harvested {LAG} months later. Fractions convert '
        f'evenly Oct 2026-Mar 2029 (18 months plus 12 of extensions); current pace = {PACE["micro"]:.0f} microbusiness, {PACE["mezzo"]:.1f} mezzobusiness and '
        f'{PACE["cult"]:.1f} cultivator licenses a month (the Dec 2025-Sep 2026 rate) until Mar 2029. Approval dates are not published, so all scenarios assume the same deadline. Not a forecast. Analysis by Tanner Berris.')
 fig.text(0.06, 0.012, '\n'.join(textwrap.wrap(src, 155)), fontsize=7.3, color=INK2, va='bottom')
@@ -62,16 +65,16 @@ a1.text(0.0, 1.06, 'Licensed cultivation sites', transform=a1.transAxes, fontsiz
 
 # bottom: harvests
 a2 = fig.add_subplot(gs[1], sharex=a1); style(a2)
-a2.axvspan(D('2026-08'), D('2026-12'), color=INK2, alpha=0.08, lw=0)
+a2.axvspan(D(max(H)), D(SETTLED), color=INK2, alpha=0.08, lw=0)
 ymax = max(max(v.values()) for v in HV.values()) * 1.1
-a2.text(D('2026-10'), ymax * 0.36, 'Already\nplanted', fontsize=8, color=INK2, ha='center', va='top')
+a2.text(D(max(H)) + (D(SETTLED) - D(max(H))) / 2, ymax * 0.36, 'Already\nplanted', fontsize=8, color=INK2, ha='center', va='top')
 ho = sorted(H.items())
 a2.plot([D(p) for p, _ in ho], [v for _, v in ho], color=INK, lw=2.2)
 last = max(H)
 for name, f_, col in SCEN:
     pts = [(last, H[last])] + sorted(HV[name].items())
     a2.plot([D(p) for p, _ in pts], [v for _, v in pts], color=col, lw=1.6, ls=(0, (4, 2)) if name != 'Current pace' else (0, (1.5, 1.5)))
-a2.annotate(f'Observed\n{H[last]:,.0f} (July 2026)', (D(last), H[last]), xytext=(-70, 40), textcoords='offset points', fontsize=8, color=INK,
+a2.annotate(f'Observed\n{H[last]:,.0f} ({LONG(last)})', (D(last), H[last]), xytext=(-70, 40), textcoords='offset points', fontsize=8, color=INK,
             arrowprops=dict(arrowstyle='-', color=INK, lw=0.8))
 a2.set_ylim(0, ymax)
 a2.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f'{v/1000:,.0f}k' if v else '0'))
@@ -109,7 +112,7 @@ fig = plt.figure(figsize=(9.7, 8.4), dpi=150); fig.patch.set_facecolor(SURF)
 gs = fig.add_gridspec(2, 1, height_ratios=[1, 1.7], hspace=0.34, left=0.09, right=0.8, top=0.83, bottom=0.135)
 fig.text(0.06, 0.965, 'How much cannabis Minnesota could grow as licenses convert', fontsize=14.5, weight='bold', color=INK, va='top')
 sub = ('Licensed cultivation sites and plants harvested per year under four licensing scenarios for the 975 microbusiness, 48 mezzobusiness '
-       'and 19 cultivator preliminary approvals. 2026 is largely settled: harvests through November come from plants already started.')
+       f'and 19 cultivator preliminary approvals. 2026 is largely settled: harvests through {LONG(SETTLED)} come from plants already started.')
 fig.text(0.06, 0.93, '\n'.join(textwrap.wrap(sub, 137)), fontsize=9.3, color=INK2, va='top')
 fig.text(0.06, 0.012, '\n'.join(textwrap.wrap(src.replace('Not a forecast.', 'Yearly bars are sums of monthly harvests. Not a forecast.'), 155)), fontsize=7.3, color=INK2, va='bottom')
 

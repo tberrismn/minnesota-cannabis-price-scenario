@@ -1,6 +1,6 @@
 # When will cannabis get cheaper in Minnesota? Data and code
 
-Data and code behind Tanner Berris's Substack article on Minnesota cannabis flower prices.
+Data and code behind Tanner Berris's Substack article on Minnesota cannabis flower prices. How it was built: [METHODS.md](METHODS.md).
 
 The article asks one question: if Minnesota's legal flower market follows the path Michigan's did, when do prices fall, and how far? This package rebuilds all three charts in the article from public data. Run it again when the Minnesota Office of Cannabis Management (OCM) publishes new numbers to check the scenario against what actually happened.
 
@@ -69,4 +69,4 @@ When OCM publishes a new month, add the rows to `code/data/mn_supply.csv` and `c
 
 ## License
 
-Be Kind, People Don't Own Information.
+Be kind, people don't own information.

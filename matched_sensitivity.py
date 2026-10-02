@@ -56,7 +56,7 @@ def run_combos():
         for b, tag in (('combined', 'Combined'), ('adult_use', 'Adult-use only')):
             r = M.scenario(basis=b, **kw)
             row[f'{tag}: hold ends'] = r['hold_end']
-            row[f'{tag}: first month 25% below $14.59'] = first_below(r)
+            row[f'{tag}: first month 25% below ${M.MN_LEVEL:.2f}'] = first_below(r)
             for p in COMBO_CHECKS:
                 v = r['price'][p][0]
                 row[f'{tag}: {p} ($/g)'] = round(v, 2) if v is not None else None

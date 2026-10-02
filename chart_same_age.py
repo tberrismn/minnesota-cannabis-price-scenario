@@ -14,7 +14,7 @@ SURF, INK, INK2, GRID = '#fcfcfb', '#0b0b0b', '#52514e', '#e6e5e0'
 COL = {'MI': '#2a78d6', 'MA': '#eb6834', 'IL': '#eda100'}
 NAME = {'MI': 'Michigan', 'MA': 'Massachusetts', 'IL': 'Illinois'}
 STATES = ('MI', 'MA', 'IL')
-START, YEARS = 10, 3            # Minnesota's latest reading is month 10 (12 months through July 2026)
+START, YEARS = 10, 3            # anchored at Minnesota's month 10 (12 months through July 2026); later readings are plotted as observed
 END = START + 12 * YEARS        # month 46 = July 2029
 MN_LAUNCH = (2025, 9)
 plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 10})
@@ -60,7 +60,7 @@ def draw(K, tag, png, unit_sub, ylab, ytick, dec, title_note='', title='If Minne
     fig.text(0.06, 0.908, '\n'.join(textwrap.wrap(sub, 128)), fontsize=9.5, color=INK2, va='top')
     src = ('Source: MN OCM (12-month median); MI CRA (ounce-weighted average), MA CCC (average), IL CROO (flower average); BLS Midwest CPI. '
            'State lines use each month\'s published price and percentage changes, not price levels; Massachusetts April 2020 (COVID closure) is omitted. The band spans the three lines; it is not a forecast range. '
-           'Minnesota\'s dashed line joins its two published readings; the months between are not published.' + title_note + ' Analysis by Tanner Berris.')
+           'Minnesota\'s dashed line joins its published readings; the months between are not published.' + title_note + ' Analysis by Tanner Berris.')
     fig.text(0.06, 0.018, '\n'.join(textwrap.wrap(src, 150)), fontsize=7.5, color=INK2, va='bottom')
 
     xs = [mdate(m) for m in range(START, END + 1)]
@@ -81,7 +81,7 @@ def draw(K, tag, png, unit_sub, ylab, ytick, dec, title_note='', title='If Minne
     # Minnesota's two published 12-month medians, joined by a thin dashed line (months between are not published)
     ax.plot([mdate(m) for m, _ in MNs], [v for _, v in MNs], color=INK, lw=1.2, ls=(0, (3, 2)), zorder=4)
     ax.plot([mdate(m) for m, _ in MNs], [v for _, v in MNs], 'o', color=INK, ms=7, zorder=5)
-    for m, v in MNs:
+    for m, v in (MNs[0], MNs[-1]):   # first and latest readings; adjacent months would overlap
         ax.annotate(fmt(v).replace('$', r'\$'), (mdate(m), v), xytext=(0, -16), textcoords='offset points', ha='center', fontsize=8, color=INK)
     ax.text(mdate(MNs[0][0]) + dt.timedelta(days=100), MNs[0][1] - 2.4 * K, 'Minnesota, published\n12-month medians', fontsize=8.5, color=INK, weight='bold', ha='center', va='top')
     # key: which color is which state (Illinois and Massachusetts end close together)

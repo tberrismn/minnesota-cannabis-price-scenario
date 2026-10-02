@@ -14,8 +14,9 @@ Rules (all parameters in BASE; every one is varied in matched_sensitivity.py):
   3. After that, each month the scenario price = starting level x Michigan's adult-use price in the first month (from the anchor on)
      its throughput reached Minnesota's / Michigan's price at the anchor. Only Michigan's percentage changes are used.
   4. Optional monthly speed limit `cap` (base: the steepest five-month fall in any comparison state, as a monthly rate).
-Starting level: OCM's 12-month adult-use flower median through July 2026 ($14.29), in August 2026 dollars. It is a trailing
-median, not a July shelf price; Minnesota publishes no monthly price.
+Starting level: OCM's latest 12-month adult-use flower median, in base-month dollars (BLS CPI-U Midwest). It is a trailing
+median, not a shelf price; Minnesota publishes no monthly price. The scenario starts at the month of OCM's latest 12-month card.
+Michigan's history runs out at its highest 12-month level; if Minnesota passes it, the run stops there (no extrapolation).
 Minnesota flower sold = harvested plants x grams per plant (calibrated to OCM's 12-month flower card), spread over `sell` months
 starting `sale_lag` months after harvest. The 12-month spread is the best fit to Michigan's own harvest and sales records
 (CRA, sales Jun 2022 - Aug 2026; see michigan_harvest_fit.py)."""
@@ -26,20 +27,28 @@ from supply_model import add, ym
 from common import flower_grams_sold, per_adult, pop21, primary_series, index_series, LAUNCH, add_months, G_PER_OZ, G_PER_LB, rd
 
 POP = pop21('MN', 2024)
-START, END = '2026-07', '2029-12'
-MN_LEVEL = 14.588064215342042          # OCM 12-month adult-use median through July 2026 ($14.29), August 2026 dollars
-MN_OBS = [('2025-12', 14.0189), ('2026-07', MN_LEVEL)]
+from common import CPI, CPI_BASE_MONTH, msl
+_flower = [r for r in csv.DictReader(open(os.path.join(SM.DATA, 'mn_supply.csv'))) if r['period_type'] == 'ttm' and r['variable'] == 'flower_sold_oz_adult_use']
+LATEST = max(r['period'] for r in _flower)          # month of OCM's latest 12-month flower card; the scenario starts here
+START, END = LATEST, '2029-12'
+def _real(r):
+    """A 12-month median in base-month dollars, deflated by the average CPI over the adult-use months in its window."""
+    m_end = msl('MN', r['period']); win = [add_months(LAUNCH['MN'], k) for k in range(max(0, m_end - 11), m_end + 1)]
+    return float(r['value']) * CPI[CPI_BASE_MONTH] / (sum(CPI[p] for p in win) / len(win))
+MN_PUB = sorted((r['period'], float(r['value'])) for r in rd('mn_prices.csv') if r['market'] == 'adult_use' and r['period_type'] == 'ttm')
+MN_OBS = sorted((r['period'], _real(r)) for r in rd('mn_prices.csv') if r['market'] == 'adult_use' and r['period_type'] == 'ttm')
+MN_LEVEL = MN_OBS[-1][1]                             # latest OCM 12-month adult-use median, in base-month dollars
 MAIN = 'Current pace'
 months = [add('2025-08', i) for i in range(60) if add('2025-08', i) <= END]
-CAL = [add('2025-08', i) for i in range(12)]   # OCM 12-month card window, Aug 2025 - Jul 2026
+CAL = [add(LATEST, i - 11) for i in range(12)]   # OCM 12-month card window ending at the latest card
 
 # ---- Minnesota observed 12-month flower volume (OCM), ounces
 TTM = {r['variable']: float(r['value']) for r in csv.DictReader(open(os.path.join(SM.DATA, 'mn_supply.csv')))
-       if r['period'] == '2026-07' and r['period_type'] == 'ttm' and r['variable'] in ('flower_sold_oz_adult_use', 'flower_sold_oz_medical')}
+       if r['period'] == LATEST and r['period_type'] == 'ttm' and r['variable'] in ('flower_sold_oz_adult_use', 'flower_sold_oz_medical')}
 TTM_AU, TTM_MED = TTM['flower_sold_oz_adult_use'], TTM['flower_sold_oz_medical']
 TTM_OZ = TTM_AU + TTM_MED
 MED_G = TTM_MED * G_PER_OZ / 12        # medical flower per month, held at its observed 12-month level (medical sales ran about
-                                       # $8M a month in late 2025 and in the year to Sep 2026; medical plant starts 9-13k a month in 2026)
+                                       # $8M a month in late 2025 and in the year to Sep 2026; medical plant starts 8.7-14.2k a month, Feb-Aug 2026)
 
 def avg12(series, p, first):
     win = [q for q in (add(p, -j) for j in range(12)) if q >= first]
@@ -107,8 +116,9 @@ def scenario(**kw):
         target[p], price[p] = (t, m), (v, m)
         if v is not None: prev = v
     hold_end = next((p for p in months if p >= START and X12[p] >= hold), None)
+    beyond = next((p for p in months if p >= START and X12[p] > max(mi12[q] for q in mim)), None)   # past Michigan's highest level: run stops
     return dict(opts=o, surv=surv, gpp=gpp, sold=sold, au=au, X12=X12, anchor=anchor, hold=hold, hold_end=hold_end,
-                target=target, price=price)
+                target=target, price=price, beyond=beyond)
 
 def ttm_oz(r, p, which='sold'):
     win = [add(p, -j) for j in range(12)]

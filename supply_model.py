@@ -29,10 +29,11 @@ au, med, H, sites = V['plants_started_adult_use'], V['plants_started_medical'], 
 # ---------------- ASSUMPTIONS (all from OCM data unless noted)
 LAG = 4                                          # months from planting to harvest
 hm = [p for p in sorted(H) if add(p, -LAG) in au]
-SURV = sum(H[p] for p in hm) / sum(au[add(p, -LAG)] + med[add(p, -LAG)] for p in hm)   # harvested / started, May-Jul 2026
-rate = {ym(p)[1]: au[p] / sites[p] for p in au}  # adult-use starts per licensed cultivation site, by calendar month (Jan-Jul 2026)
+SURV = sum(H[p] for p in hm) / sum(au[add(p, -LAG)] + med[add(p, -LAG)] for p in hm)   # harvested / started, every month with both (May-Aug 2026)
+rate = {ym(p)[1]: au[p] / sites[p] for p in au}  # adult-use starts per licensed cultivation site, by calendar month (Jan-Aug 2026)
 INDOOR = sum(rate[i] for i in (1, 2, 3, 4)) / 4
-for i in range(8, 13): rate[i] = INDOOR          # Aug-Dec: no published data; Jan-Apr (indoor-season) average
+NO_DATA = [i for i in range(1, 13) if i not in rate]   # calendar months with no published 2026 starts yet
+for i in NO_DATA: rate[i] = INDOOR                # those months use the Jan-Apr (indoor-season) average
 MED = sum(med.values()) / len(med)               # medical starts per month, 2026 average
 SAS = 'OCM Summary Application Data'
 MICRO_SHARE = 112 / SNAP[('licensed_microbusinesses', '2026-09', SAS)]   # 112 of 276 microbusinesses hold a cultivation site (163 sites - 24 cultivator - 24 mezzo - 3 med combo)
@@ -44,7 +45,7 @@ def snap(v, p, src): return next(val for (vv, pp, ss), val in SNAP.items() if vv
 PACE = {'micro': (snap('licensed_microbusinesses', '2026-09', SAS) - snap('licensed_microbusinesses', '2025-12', MAR)) / 9,
         'mezzo': (snap('licenses_issued_mezzobusiness', '2026-09', SAS) - snap('licenses_issued_mezzobusiness', '2025-12', MAR)) / 9,
         'cult': (snap('licensed_cultivators', '2026-09', SAS) - snap('licensed_cultivators', '2025-12', MAR)) / 9}
-SITES_NOW, NOW = 163, '2026-09'                  # OCM workbook, September 2026
+SITES_NOW, NOW = int(SNAP[('licensed_cultivation_sites', '2026-09', 'OCM Cannabis Market Monitor (Power BI)')]), '2026-09'   # dashboard, as of Sep 25, 2026
 FIRST, WINDOW = '2026-10', 30                    # conversions from Oct 2026 over 18 months plus up to 12 months of extensions (to Mar 2029)
 END = '2029-12'
 
